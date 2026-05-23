@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="kn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agrivaan - ರೈತರ ಸಮೀಕ್ಷಾ ಫಾರ್ಮ್</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+
+<body>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="glass-card p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold text-success">ರೈತರ ಸಮೀಕ್ಷಾ ಫಾರ್ಮ್</h2>
+                        <p class="text-muted">ದಯವಿಟ್ಟು ಎಲ್ಲಾ ವಿವರಗಳನ್ನು ಭರ್ತಿ ಮಾಡಿ</p>
+                    </div>
+
+                    <div class="alert alert-info text-center">
+                        ಹೆಸರು ಮತ್ತು ಮೊಬೈಲ್ ನಂಬರ್ ಕಡ್ಡಾಯ (*). ಉಳಿದ ಎಲ್ಲಾ ಪ್ರಶ್ನೆಗಳು ಐಚ್ಛಿಕ.
+                    </div>
+
+                    <form id="surveyForm" novalidate>
+                        <!-- Honeypot -->
+                        <div style="display:none;">
+                            <input type="text" name="website" id="website">
+                        </div>
+
+                        <!-- Step 1: Personal Details -->
+                        <div class="mb-5 border-bottom pb-4">
+                            <h4 class="mb-4 border-bottom pb-2">1. ವೈಯಕ್ತಿಕ ವಿವರಗಳು (Personal)</h4>
+                            <div class="mb-3">
+                                <label class="form-label">1. ರೈತನ ಪೂರ್ಣ ಹೆಸರು *</label>
+                                <input type="text" name="full_name" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">2. ಮೊಬೈಲ್ ನಂಬರ್ *</label>
+                                <input type="tel" id="mobile_number" name="mobile_number" class="form-control" required
+                                    maxlength="10" pattern="[0-9]{10}">
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="mobileVerified"
+                                        name="mobile_verified" value="ಹೌದು">
+                                    <label class="form-check-label" for="mobileVerified">ಈ ಮೊಬೈಲ್ ನಂಬರ್ ನನ್ನ WhatsApp
+                                        ನಂಬರ್ ಆಗಿ ಉಪಯೋಗಿಸಿ</label>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">3. WhatsApp ನಂಬರ್</label>
+                                <input type="tel" id="whatsapp_number" name="whatsapp_number" class="form-control"
+                                    maxlength="10" pattern="[0-9]{10}">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">4. ಲಿಂಗ</label>
+                                <div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="gender" value="ಗಂಡು">
+                                        <label class="form-check-label">ಗಂಡು</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="gender" value="ಹೆಣ್ಣು">
+                                        <label class="form-check-label">ಹೆಣ್ಣು</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">5. ವಯಸ್ಸು</label>
+                                <input type="number" name="age" class="form-control" min="18" max="100">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">6. ಶಿಕ್ಷಣ</label>
+                                <select name="education" class="form-select other-trigger"
+                                    data-target="education_other_div">
+                                    <option value="">ಆಯ್ಕೆ ಮಾಡಿ (Select)</option>
+                                    <option value="ಶಾಲೆಗೆ ಹೋಗಿಲ್ಲ">ಶಾಲೆಗೆ ಹೋಗಿಲ್ಲ</option>
+                                    <option value="ಪ್ರಾಥಮಿಕ">ಪ್ರಾಥಮಿಕ</option>
+                                    <option value="ಹೈ ಸ್ಕೂಲ್">ಹೈ ಸ್ಕೂಲ್</option>
+                                    <option value="ಪಿಯುಸಿ">ಪಿಯುಸಿ</option>
+                                    <option value="ಡಿಗ್ರಿ">ಡಿಗ್ರಿ</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="mb-3 d-none" id="education_other_div">
+                                <label class="form-label">ನಿಮ್ಮ ಶಿಕ್ಷಣದ ವಿವರ (Please specify)</label>
+                                <input type="text" name="education_other" class="form-control">
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">7. ಗ್ರಾಮ</label>
+                                    <input type="text" name="village_name" class="form-control">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">8. ತಾಲ್ಲೂಕು</label>
+                                    <input type="text" name="taluk" class="form-control">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">9. ಜಿಲ್ಲೆ</label>
+                                    <input type="text" name="district" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Tech & Digital -->
+                        <div class="mb-5 border-bottom pb-4">
+                            <h4 class="mb-4 border-bottom pb-2">2. ತಂತ್ರಜ್ಞಾನ ಬಳಕೆ (Tech)</h4>
+                            <div class="mb-3">
+                                <label class="form-label">10. ನೀವು Smartphone ಬಳಸುತ್ತೀರಾ?</label>
+                                <div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="uses_smartphone" value="ಹೌದು">
+                                        <label class="form-check-label">ಹೌದು</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="uses_smartphone" value="ಇಲ್ಲ">
+                                        <label class="form-check-label">ಇಲ್ಲ</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">11. ಸೋಶಿಯಲ್ ಮೀಡಿಯಾ ಬಳಕೆ</label>
+                                <div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="social_media" value="ಹೌದು">
+                                        <label class="form-check-label">ಹೌದು</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="social_media" value="ಇಲ್ಲ">
+                                        <label class="form-check-label">ಇಲ್ಲ</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">12. ನೀವು ಯಾವ ಬೆಳೆಗಳನ್ನು ಬೆಳೆಯುತ್ತೀರಿ? (Categories)</label>
+                                <div class="row">
+                                    <div class="col-sm-6 col-12">
+                                        <div class="form-check"><input class="form-check-input" type="checkbox"
+                                                name="crops_grown" value="ಅಡಿಕೆ"><label class="form-check-label">ಅಡಿಕೆ
+                                                (Arecanut)</label></div>
+                                        <div class="form-check"><input class="form-check-input" type="checkbox"
+                                                name="crops_grown" value="ತೆಂಗು"><label class="form-check-label">ತೆಂಗು
+                                                (Coconut)</label></div>
+                                        <div class="form-check"><input class="form-check-input" type="checkbox"
+                                                name="crops_grown" value="ರಾಗಿ"><label class="form-check-label">ರಾಗಿ
+                                                (Ragi)</label></div>
+                                    </div>
+                                    <div class="col-sm-6 col-12">
+                                        <div class="form-check"><input class="form-check-input" type="checkbox"
+                                                name="crops_grown" value="ಅಕ್ಕಿ"><label class="form-check-label">ಅಕ್ಕಿ
+                                                (Paddy)</label></div>
+                                        <div class="form-check"><input class="form-check-input" type="checkbox"
+                                                name="crops_grown" value="ಹಣ್ಣುಗಳು"><label
+                                                class="form-check-label">ಹಣ್ಣುಗಳು (Fruits)</label></div>
+                                        <div class="form-check">
+                                            <input class="form-check-input other-trigger" type="checkbox"
+                                                name="crops_grown" value="Other" data-target="#cropsOther">
+                                            <label class="form-check-label">ಇತರೆ (Other)</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <input type="text" id="cropsOther" name="crops_grown_other"
+                                    class="form-control d-none mt-2" placeholder="ವಿವರಿಸಿ (Specify)">
+                            </div>
+
+                        </div>
+
+                        <!-- Step 3: Machinery -->
+                        <div class="mb-5 border-bottom pb-4">
+                            <h4 class="mb-4 border-bottom pb-2">3. ಯಂತ್ರೋಪಕರಣ (Machinery)</h4>
+                            <div class="mb-3">
+                                <label class="form-label">13. ನಿಮ್ಮ ಸ್ವಂತ ಮಷಿನ್ ಇದೆಯಾ?</label>
+                                <div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="owns_machine" value="ಹೌದು">
+                                        <label class="form-check-label">ಹೌದು</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="owns_machine" value="ಇಲ್ಲ">
+                                        <label class="form-check-label">ಇಲ್ಲ</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">14. ಮಷಿನ್ ಸಿಗುವುದರಲ್ಲಿ ಸಮಸ್ಯೆ ಇದೆಯ್ಯಾ?</label>
+                                <div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="machinery_problem" value="ಹೌದು">
+                                        <label class="form-check-label">ಹೌದು</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="machinery_problem" value="ಇಲ್ಲ">
+                                        <label class="form-check-label">ಇಲ್ಲ</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 4: Commerce/Trading -->
+                        <div class="mb-5 border-bottom pb-4">
+                            <h4 class="mb-4 border-bottom pb-2">4. ಮಾರಾಟ ಮತ್ತು ವ್ಯಾಪಾರ (Commerce)</h4>
+                            <div class="mb-3">
+                                <label class="form-label">15. ನೀವು ಯಾವುದಾದರೂ ಕೃಷಿ ಸಂಬಂಧಿತ ವಸ್ತುಗಳನ್ನು ಮಾರುತ್ತೀರಾ?</label>
+                                <div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="sells_agri_related_items" value="ಬೀಜ">
+                                        <label class="form-check-label">ಬೀಜ (Seeds)</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="sells_agri_related_items" value="ಗೊಬ್ಬರ">
+                                        <label class="form-check-label">ಗೊಬ್ಬರ (Fertilizer)</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="sells_agri_related_items" value="ಸಸಿ">
+                                        <label class="form-check-label">ಸಸಿ (Plants)</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input other-trigger" type="checkbox" name="sells_agri_related_items" value="ಇತರ" data-target="#agriItemsOther">
+                                        <label class="form-check-label">ಇತರ (Other)</label>
+                                    </div>
+                                </div>
+                                <input type="text" id="agriItemsOther" name="sells_agri_related_items_other" class="form-control d-none mt-2" placeholder="ವಿವರಿಸಿ (Specify)">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">16. ನಮ್ಮ App ಮೂಲಕ ಮಾರಾಟ/ಖರೀದಿ ಮಾಡಲು ಆಸಕ್ತಿ ಇದೆಯಾ?</label>
+                                <div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="app_trade_interest" value="ಹೌದು">
+                                        <label class="form-check-label">ಹೌದು</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="app_trade_interest" value="ಇಲ್ಲ">
+                                        <label class="form-check-label">ಇಲ್ಲ</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 5: Final -->
+                        <div class="mb-5 border-bottom pb-4">
+                            <h4 class="mb-4 border-bottom pb-2">5. ಅಂತಿಮ ವಿವರಗಳು (Final)</h4>
+                            <div class="mb-3">
+                                <label class="form-label">17. ಅಗ್ರಿವಾನ್App  ನಲ್ಲಿ ನಿಮಗೆ ಯಾವ ಸೇವೆ ಹೆಚ್ಚು ಬೇಕು?</label>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-check"><input class="form-check-input"
+                                                type="checkbox" name="desired_services"
+                                                value="ಪ್ರಾಣಿಗಳ ಖರೀದಿ / ಮಾರಾಟ"><label class="form-check-label">ಪ್ರಾಣಿಗಳ
+                                                ಖರೀದಿ / ಮಾರಾಟ</label></div>
+                                        <div class="form-check"><input class="form-check-input"
+                                                type="checkbox" name="desired_services"
+                                                value="ಕೃಷಿ ಮಾಹಿತಿ"><label class="form-check-label">ಕೃಷಿ ಮಾಹಿತಿ</label>
+                                        </div>
+                                        <div class="form-check"><input class="form-check-input"
+                                                type="checkbox" name="desired_services"
+                                                value="Market Rates"><label class="form-check-label">Market
+                                                Rates</label></div>
+                                        <div class="form-check"><input class="form-check-input"
+                                                type="checkbox" name="desired_services"
+                                                value="ಬೀಜ & ರಸಗೊಬ್ಬರ"><label class="form-check-label">ಬೀಜ &
+                                                ರಸಗೊಬ್ಬರ</label></div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check"><input class="form-check-input"
+                                                type="checkbox" name="desired_services"
+                                                value="ಕೃಷಿ ಯಂತ್ರ ಬಾಡಿಗೆ"><label class="form-check-label">ಕೃಷಿ ಯಂತ್ರ
+                                                ಬಾಡಿಗೆ</label></div>
+                                        <div class="form-check"><input class="form-check-input"
+                                                type="checkbox" name="desired_services"
+                                                value="ಲಾಜಿಸ್ಟಿಕ್"><label class="form-check-label">ಲಾಜಿಸ್ಟಿಕ್</label>
+                                        </div>
+                                        <div class="form-check"><input class="form-check-input"
+                                                type="checkbox" name="desired_services"
+                                                value="Loan and insurance"><label class="form-check-label">Loan and
+                                                insurance</label></div>
+                                        <div class="form-check"><input class="form-check-input"
+                                                type="checkbox" name="desired_services"
+                                                value="ಎಲ್ಲವೂ"><label class="form-check-label">ಎಲ್ಲವೂ (All)</label></div>
+                                        <div class="form-check">
+                                            <input class="form-check-input other-trigger"
+                                                type="checkbox" name="desired_services"
+                                                value="Other" data-target="#servicesOther">
+                                            <label class="form-check-label">ಇತರೆ</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <input type="text" id="servicesOther" name="desired_services_other"
+                                    class="form-control d-none mt-2" placeholder="ವಿವರಿಸಿ">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">18. Launch ಸಮಯದಲ್ಲಿ Agrivaan ಸೇರಲು ಇಷ್ಟವಿದೆಯಾ?</label>
+                                <select name="join_on_launch" class="form-select">
+                                    <option value="" selected disabled>ಆಯ್ಕೆ ಮಾಡಿ</option>
+                                    <option value="ಹೌದು">ಹೌದು</option>
+                                    <option value="ಇಲ್ಲ">ಇಲ್ಲ</option>
+                                    <option value="ಇನ್ನಷ್ಟು ಮಾಹಿತಿ ಬೇಕು">ಇನ್ನಷ್ಟು ಮಾಹಿತಿ ಬೇಕು</option>
+                                </select>
+                            </div>
+
+                            <div id="dynamicQuestionsContainer">
+                                <!-- Dynamic questions will be loaded here -->
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">19. Feed Back</label>
+                                <textarea name="feedback" class="form-control" rows="3"></textarea>
+                            </div>
+
+                            <div class="text-center mt-5">
+                                <button type="submit" class="btn btn-success btn-lg px-5 shadow-sm">ಸಮೀಕ್ಷೆ ಸಲ್ಲಿಸಿ
+                                    (Submit Survey)</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/survey.js"></script>
+    <script>
+        // Force form reset on load to ensure placeholders are shown
+        window.onload = function () {
+            document.getElementById('surveyForm').reset();
+        };
+
+        // Mobile and WhatsApp number sync functionality
+        const mobileInput = document.getElementById('mobile_number');
+        const whatsappInput = document.getElementById('whatsapp_number');
+        const mobileVerifyCheckbox = document.getElementById('mobileVerified');
+
+        // When mobile verification checkbox is clicked, copy mobile to WhatsApp
+        mobileVerifyCheckbox.addEventListener('change', function () {
+            if (this.checked) {
+                // Copy mobile number to WhatsApp field
+                if (mobileInput.value) {
+                    whatsappInput.value = mobileInput.value;
+                } else {
+                    alert('ದಯವಿಟ್ಟು ಮೊಬೈಲ್ ನಂಬರ್ ಮೊದಲು ಭರ್ತಿ ಮಾಡಿ (Please enter mobile number first)');
+                    this.checked = false;
+                }
+            } else {
+                // Uncheck: clear WhatsApp field
+                whatsappInput.value = '';
+            }
+        });
+
+        // When mobile number changes, update WhatsApp if checkbox is checked
+        mobileInput.addEventListener('input', function () {
+            if (mobileVerifyCheckbox.checked) {
+                whatsappInput.value = this.value;
+            }
+        });
+    </script>
+</body>
+
+</html>

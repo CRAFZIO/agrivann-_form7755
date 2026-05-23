@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agrivaan - Analytics</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <button class="sidebar-toggler" id="sidebarToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <nav id="sidebar">
+        <div class="sidebar-header">
+            <h4 class="fw-bold m-0"><i class="fas fa-sprout me-2"></i>Agrivaan</h4>
+        </div>
+        <div class="mt-4">
+            <a href="dashboard.html" class="sidebar-link"><i class="fas fa-tachometer-alt me-3"></i>Dashboard</a>
+            <a href="farmers.html" class="sidebar-link"><i class="fas fa-users me-3"></i>Farmers List</a>
+            <a href="questions.html" class="sidebar-link"><i class="fas fa-question-circle me-3"></i>Survey Questions</a>
+            <a href="analytics.html" class="sidebar-link active"><i class="fas fa-chart-pie me-3"></i>Analytics</a>
+            <a href="settings.html" class="sidebar-link"><i class="fas fa-cog me-3"></i>Settings</a>
+            <a href="#" class="sidebar-link mt-5" id="logoutBtn"><i class="fas fa-sign-out-alt me-3"></i>Logout</a>
+        </div>
+        <div class="sidebar-footer mt-auto">
+            <div class="text-white-50 small">
+                <i class="fas fa-shield-alt me-2"></i> Agrivaan Admin v2.0
+            </div>
+        </div>
+    </nav>
+
+    <div id="content">
+        <h2 class="fw-bold mb-4">Graph Analytics</h2>
+
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="glass-card p-4">
+                    <h5 class="fw-bold mb-4">Crop Distribution</h5>
+                    <canvas id="cropChart"></canvas>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="glass-card p-4">
+                    <h5 class="fw-bold mb-4">District-wise Farmers</h5>
+                    <canvas id="districtChart"></canvas>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="glass-card p-4">
+                    <h5 class="fw-bold mb-4">Machinery Usage Analytics</h5>
+                    <canvas id="machineryChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/admin.js"></script>
+    <script>
+        async function loadCharts() {
+            try {
+                // Crop Chart
+                const cropRes = await axiosInstance.get('/analytics/crops');
+                const cropData = cropRes.data;
+                new Chart(document.getElementById('cropChart'), {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(cropData),
+                        datasets: [{
+                            data: Object.values(cropData),
+                            backgroundColor: ['#2ecc71', '#3498db', '#f1c40f', '#e74c3c', '#9b59b6', '#34495e']
+                        }]
+                    }
+                });
+
+                // District Chart
+                const distRes = await axiosInstance.get('/analytics/districts');
+                const distData = distRes.data;
+                new Chart(document.getElementById('districtChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(distData),
+                        datasets: [{
+                            label: 'Number of Farmers',
+                            data: Object.values(distData),
+                            backgroundColor: '#27ae60'
+                        }]
+                    }
+                });
+
+                // Machinery Chart
+                const machRes = await axiosInstance.get('/analytics/machinery');
+                const machData = machRes.data;
+                new Chart(document.getElementById('machineryChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(machData),
+                        datasets: [{
+                            label: 'Machines Used',
+                            data: Object.values(machData),
+                            backgroundColor: '#f39c12'
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y'
+                    }
+                });
+
+            } catch (error) {
+                handleAuthError(error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadCharts);
+    </script>
+</body>
+</html>

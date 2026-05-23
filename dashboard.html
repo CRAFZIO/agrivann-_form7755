@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agrivaan - Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <button class="sidebar-toggler" id="sidebarToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- Sidebar -->
+    <nav id="sidebar">
+        <div class="sidebar-header">
+            <h4 class="fw-bold m-0"><i class="fas fa-sprout me-2"></i>Agrivaan</h4>
+        </div>
+        <div class="mt-4">
+            <a href="dashboard.html" class="sidebar-link active"><i class="fas fa-tachometer-alt me-3"></i>Dashboard</a>
+            <a href="farmers.html" class="sidebar-link"><i class="fas fa-users me-3"></i>Farmers List</a>
+            <a href="questions.html" class="sidebar-link"><i class="fas fa-question-circle me-3"></i>Survey Questions</a>
+            <a href="analytics.html" class="sidebar-link"><i class="fas fa-chart-pie me-3"></i>Analytics</a>
+            <a href="settings.html" class="sidebar-link"><i class="fas fa-cog me-3"></i>Settings</a>
+            <a href="#" id="logoutBtn" class="sidebar-link mt-5"><i class="fas fa-sign-out-alt me-3"></i>Logout</a>
+        </div>
+        <div class="sidebar-footer mt-auto">
+            <div class="text-white-50 small">
+                <i class="fas fa-shield-alt me-2"></i> Agrivaan Admin v2.0
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div id="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold">Admin Dashboard</h2>
+            <div class="dropdown">
+                <button class="btn glass-card dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-user-circle me-2"></i> <span id="adminEmailDisplay">Admin</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                    <li><a class="dropdown-item" href="settings.html">Profile</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" href="#" onclick="logout()">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-3">
+                <div class="glass-card stat-card">
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
+                    <div class="stat-value" id="totalFarmers">0</div>
+                    <div class="stat-label">Total Farmers</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="glass-card stat-card">
+                    <div class="stat-icon text-warning" style="background: #fff9db;"><i class="fas fa-tractor"></i></div>
+                    <div class="stat-value" id="machineryUsers">0</div>
+                    <div class="stat-label">Machinery Users</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="glass-card stat-card">
+                    <div class="stat-icon text-info" style="background: #e7f5ff;"><i class="fas fa-cow"></i></div>
+                    <div class="stat-value" id="livestockUsers">0</div>
+                    <div class="stat-label">Livestock Users</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="glass-card stat-card">
+                    <div class="stat-icon text-danger" style="background: #fff5f5;"><i class="fas fa-truck"></i></div>
+                    <div class="stat-value" id="vehicleOwners">0</div>
+                    <div class="stat-label">Vehicle Owners</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="glass-card p-4">
+                    <h5 class="fw-bold mb-4">Recent Registrations</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Name</th>
+                                    <th>District</th>
+                                    <th>Mobile</th>
+                                    <th>Date</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentFarmersTable">
+                                <!-- Data will be injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="farmers.html" class="btn btn-sm btn-outline-success">View All Farmers</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="glass-card p-4">
+                    <h5 class="fw-bold mb-4">Quick Actions</h5>
+                    <div class="d-grid gap-3">
+                        <button class="btn btn-primary-agri" onclick="exportFullData()"><i class="fas fa-file-excel me-2"></i> Export Excel</button>
+                        <a href="analytics.html" class="btn btn-outline-success"><i class="fas fa-chart-bar me-2"></i> View Full Analytics</a>
+                        <a href="survey.html" class="btn btn-outline-secondary" target="_blank"><i class="fas fa-plus me-2"></i> Add New Entry</a>
+                    </div>
+                    <hr>
+                    <div class="mt-4">
+                        <h6 class="fw-bold mb-3">Key Stats</h6>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Interested in App</span>
+                            <span class="badge bg-success" id="appInterested">0</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>WhatsApp Permission</span>
+                            <span class="badge bg-primary" id="whatsappPerm">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/admin.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDashboard();
+        });
+
+        async function exportFullData() {
+            try {
+                const exportBtn = document.querySelector('button[onclick="exportFullData()"]');
+                const originalText = exportBtn.innerHTML;
+                exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Exporting...';
+                exportBtn.disabled = true;
+
+                let allFarmers = [];
+                let page = 1;
+                let totalPages = 1;
+                
+                // Fetch all pages
+                do {
+                    const res = await axiosInstance.get(`/farmers?page=${page}`);
+                    const { farmers, pages } = res.data;
+                    if(farmers) {
+                        allFarmers = allFarmers.concat(farmers);
+                    }
+                    totalPages = pages || 1;
+                    page++;
+                } while (page <= totalPages);
+
+                if (allFarmers.length === 0) {
+                    alert('No data found to export');
+                    exportBtn.innerHTML = originalText;
+                    exportBtn.disabled = false;
+                    return;
+                }
+
+                let fullFarmersData = [];
+                for (let i = 0; i < allFarmers.length; i++) {
+                    exportBtn.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i>Fetching ${i+1}/${allFarmers.length}`;
+                    
+                    if (allFarmers[i].uses_smartphone !== undefined) {
+                         fullFarmersData.push(allFarmers[i]);
+                    } else {
+                         const detailRes = await axiosInstance.get(`/farmers/${allFarmers[i].id}`);
+                         fullFarmersData.push(detailRes.data.farmer);
+                    }
+                }
+
+                let exportData = fullFarmersData.map(farmer => {
+                    let row = {};
+                    for (const [key, value] of Object.entries(farmer)) {
+                        if (key !== 'dynamic_responses' && key !== 'id') {
+                            row[key] = value;
+                        }
+                    }
+                    if (farmer.dynamic_responses && farmer.dynamic_responses.length > 0) {
+                        farmer.dynamic_responses.forEach(dr => {
+                            row[dr.question] = dr.answer;
+                        });
+                    }
+                    return row;
+                });
+
+                const worksheet = XLSX.utils.json_to_sheet(exportData);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "All Survey Data");
+                
+                XLSX.writeFile(workbook, `Agrivaan_All_SurveyData_${new Date().toISOString().slice(0,10)}.xlsx`);
+
+                exportBtn.innerHTML = originalText;
+                exportBtn.disabled = false;
+            } catch (error) {
+                console.error(error);
+                alert('Survey export failed. Please try again.');
+                const exportBtn = document.querySelector('button[onclick="exportFullData()"]');
+                if(exportBtn) {
+                    exportBtn.innerHTML = '<i class="fas fa-file-excel me-2"></i> Export Excel';
+                    exportBtn.disabled = false;
+                }
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agrivaan - Farmer Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <button class="sidebar-toggler" id="sidebarToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <nav id="sidebar">
+        <div class="sidebar-header">
+            <h4 class="fw-bold m-0"><i class="fas fa-sprout me-2"></i>Agrivaan</h4>
+        </div>
+        <div class="mt-4">
+            <a href="dashboard.html" class="sidebar-link"><i class="fas fa-tachometer-alt me-3"></i>Dashboard</a>
+            <a href="farmers.html" class="sidebar-link active"><i class="fas fa-users me-3"></i>Farmers List</a>
+            <a href="questions.html" class="sidebar-link"><i class="fas fa-question-circle me-3"></i>Survey Questions</a>
+            <a href="analytics.html" class="sidebar-link"><i class="fas fa-chart-pie me-3"></i>Analytics</a>
+            <a href="settings.html" class="sidebar-link"><i class="fas fa-cog me-3"></i>Settings</a>
+            <a href="#" class="sidebar-link mt-5" id="logoutBtn"><i class="fas fa-sign-out-alt me-3"></i>Logout</a>
+        </div>
+        <div class="sidebar-footer mt-auto">
+            <div class="text-white-50 small">
+                <i class="fas fa-shield-alt me-2"></i> Agrivaan Admin v2.0
+            </div>
+        </div>
+    </nav>
+
+    <div id="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold"><a href="farmers.html" class="text-decoration-none text-dark"><i class="fas fa-arrow-left me-3"></i></a>Farmer Profile</h2>
+            <div>
+                <button class="btn btn-outline-danger me-2" id="deleteBtn"><i class="fas fa-trash me-2"></i>Delete</button>
+                <button class="btn btn-success me-2" onclick="exportFarmerToExcel()"><i class="fas fa-file-excel me-2"></i>Export Excel</button>
+                <button class="btn btn-primary-agri" onclick="window.print()"><i class="fas fa-print me-2"></i>Print Details</button>
+            </div>
+        </div>
+
+        <div class="row g-4" id="detailsContainer">
+            <!-- Data injected here -->
+             <div class="col-12 text-center py-5"><div class="spinner-border text-success"></div></div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/admin.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const farmerId = urlParams.get('id');
+        let currentFarmer = null;
+
+        async function loadFarmerDetails() {
+            if (!farmerId) return;
+            try {
+                const res = await axiosInstance.get(`/farmers/${farmerId}`);
+                const { farmer } = res.data;
+                currentFarmer = farmer;
+
+                const container = document.getElementById('detailsContainer');
+                container.innerHTML = `
+                    <div class="col-md-6">
+                        <div class="glass-card p-4 h-100">
+                            <h5 class="fw-bold border-bottom pb-2 mb-3 text-success"><i class="fas fa-user me-2"></i>1. ವೈಯಕ್ತಿಕ ವಿವರಗಳು (Personal)</h5>
+                            <table class="table table-borderless sm-text">
+                                <tr><th width="45%">1. ರೈತನ ಪೂರ್ಣ ಹೆಸರು</th><td>${farmer.full_name}</td></tr>
+                                <tr><th>2. ಮೊಬೈಲ್ ನಂಬರ್</th><td>${farmer.mobile_number}</td></tr>
+                                <tr><th>3. WhatsApp ನಂಬರ್</th><td>${farmer.whatsapp_number}</td></tr>
+                                <tr><th>4. ಲಿಂಗ</th><td>${farmer.gender}</td></tr>
+                                <tr><th>5. ವಯಸ್ಸು</th><td>${farmer.age}</td></tr>
+                                <tr><th>6. ಶಿಕ್ಷಣ</th><td>${farmer.education || 'N/A'}</td></tr>
+                                <tr><th>ಗ್ರಾಮ, ತಾಲ್ಲೂಕು, ಜಿಲ್ಲೆ</th><td>${farmer.village_name}, ${farmer.taluk}, ${farmer.district}</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="glass-card p-4 h-100">
+                            <h5 class="fw-bold border-bottom pb-2 mb-3 text-success"><i class="fas fa-mobile-alt me-2"></i>2. ತಂತ್ರಜ್ಞಾನ ಬಳಕೆ (Tech)</h5>
+                            <table class="table table-borderless sm-text">
+                                <tr><th width="45%">10. Smartphone ಬಳಸುತ್ತೀರಾ?</th><td>${farmer.uses_smartphone}</td></tr>
+                                <tr><th>11. ಸೋಶಿಯಲ್ ಮೀಡಿಯಾ ಬಳಕೆ</th><td>${farmer.social_media || 'None'}</td></tr>
+                                <tr><th>13. ಯಾವ ಬೆಳೆಗಳನ್ನು ಬೆಳೆಯುತ್ತೀರಿ?</th><td>${farmer.crops_grown || 'None'}</td></tr>
+                                <tr><th>36. ಲೇಬರ್ ಸಮಸ್ಯೆ ಇದೆಯಾ?</th><td>${farmer.labour_problem || 'No'}</td></tr>
+                                <tr><th>37. ಲೇಬರ್ ಸರ್ವಿಸ್ ಆಸಕ್ತಿ?</th><td>${farmer.app_labour_service_interest || 'N/A'}</td></tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="glass-card p-4">
+                            <h5 class="fw-bold border-bottom pb-2 mb-3 text-success"><i class="fas fa-tractor me-2"></i>3. ಕೃಷಿ ಯಂತ್ರೋಪಕರಣಗಳು (Machinery)</h5>
+                            <div class="row g-3 sm-text">
+                                <div class="col-md-3"><strong>14. ಕೃಷಿ ಮಷಿನರಿ ಬಳಸುತ್ತೀರಾ?</strong><br>${farmer.uses_machinery || 'No'}</div>
+                                <div class="col-md-3"><strong>15. ಯಾವ ಮಷಿನ್ ಬಳಸುತ್ತೀರಾ?</strong><br>${farmer.machines_used || 'N/A'}</div>
+                                <div class="col-md-3"><strong>16. ಸ್ವಂತ ಮಷಿನ್ ಇದೆಯಾ?</strong><br>${farmer.owns_machine || 'N/A'}</div>
+                                <div class="col-md-3"><strong>17. ಬಾಡಿಗೆ ಪಡೆಯಲು ಇಷ್ಟವೇ?</strong><br>${farmer.rents_machine || 'N/A'}</div>
+                                <div class="col-md-3"><strong>18. ಮಷಿನ್ ಸಿಗುವುದರಲ್ಲಿ ಸಮಸ್ಯೆ?</strong><br>${farmer.machinery_problem || 'No'}</div>
+                                <div class="col-md-6"><strong>19. ಮುಖ್ಯ ಸಮಸ್ಯೆ ಏನು?</strong><br>${farmer.main_problem || 'None'}</div>
+                                <div class="col-md-3"><strong>20. ಆಪ್ ಮೂಲಕ ಬುಕಿಂಗ್ ಆಸಕ್ತಿ?</strong><br>${farmer.app_booking_interest || 'N/A'}</div>
+                            </div>
+                            <div class="mt-3 p-2 bg-light rounded sm-text">
+                                <strong>21. ಬಾಡಿಗೆಗೆ ಕೊಡುತ್ತೀರಾ?:</strong> ${farmer.service_provider_interest || 'No'} 
+                                ${farmer.provider_details ? `| <strong>ವಿವರ:</strong> ${farmer.provider_details}` : ''}
+                                | <strong>22. ವ್ಯವಹಾರವು ಸಹಾಯವಾಗುತ್ತದೆಯೇ?:</strong> ${farmer.business_helpful || 'N/A'}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="glass-card p-4 h-100">
+                            <h5 class="fw-bold border-bottom pb-2 mb-3 text-success"><i class="fas fa-cow me-2"></i>5. ಪಶುಸಂಗೋಪನೆ (Livestock)</h5>
+                             <div class="mb-2 sm-text"><strong>ಪಶುಸಂಗೋಪನೆ ಮಾಡುತ್ತೀರಾ?:</strong> ${farmer.rears_livestock || 'No'}</div>
+                            <div class="mb-2 sm-text"><strong>ಯಾವ ಪ್ರಾಣಿಗಳನ್ನು ಸಾಕುತ್ತೀರಿ?:</strong> ${farmer.animals_reared || 'N/A'}</div>
+                            <div class="mb-2 sm-text"><strong>ಪ್ರಾಣಿ ಸಾಕಲು ಸಮಸ್ಯೆಗಳು?:</strong> ${farmer.problems_faced || 'None'}</div>
+                            <div class="mb-2 sm-text"><strong>28. ಪ್ರಾಣಿ ಸೇವೆಗಳು ಉಪಯುಕ್ತವೇ?:</strong> ${farmer.app_service_helpful || 'N/A'}</div>
+                            <hr>
+                            <h6 class="fw-bold text-success">6. ಗೃಹ ಬಳಕೆ ವಸ್ತುಗಳು</h6>
+                            <div class="mb-2 sm-text"><strong>29. ಗೃಹ ಬಳಕೆ ವಸ್ತು ತಯಾರಿಕೆ?:</strong> ${farmer.makes_home_products || 'No'}</div>
+                            <div class="mb-2 sm-text"><strong>ವಸ್ತುವಿನ ಹೆಸರು:</strong> ${farmer.product_names || 'N/A'}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="glass-card p-4 h-100">
+                            <h5 class="fw-bold border-bottom pb-2 mb-3 text-success"><i class="fas fa-shopping-cart me-2"></i>4. ಕೃಷಿ ಮತ್ತು ಮಾರಾಟ (Agri & Sales)</h5>
+                            <div class="mb-2 sm-text"><strong>23. ಕೃಷಿ ಸಮಸ್ಯೆಗಳು:</strong> ${farmer.agri_problems || 'N/A'}</div>
+                            <div class="mb-2 sm-text"><strong>25. ಕೃಷಿ ಉತ್ಪನ್ನ ಮಾರಾಟ ಮಾಡುತ್ತೀರಾ?:</strong> ${farmer.sells_agri_products || 'No'}</div>
+                            <div class="mb-2 sm-text"><strong>ವಸ್ತುಗಳನ್ನು ಮಾರಾಟ ಮಾಡುತ್ತೀರಿ?:</strong> ${farmer.products_for_sale || 'N/A'}</div>
+                            <div class="mb-2 sm-text"><strong>27. ಕಾರ್ಯಕ್ರಮಗಳ ವಸ್ತುಗಳು:</strong> ${farmer.event_products || 'N/A'}</div>
+                            <hr>
+                            <div class="mb-2 sm-text"><strong>30. ಕೃಷಿ ಸಂಬಂಧಿತ ವಸ್ತು ಮಾರಾಟ?:</strong> ${farmer.sells_agri_related_items || 'No'}</div>
+                            <div class="mb-2 sm-text"><strong>ವಸ್ತುವಿನ ಹೆಸರು:</strong> ${farmer.agri_item_names || 'N/A'}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="glass-card p-4">
+                            <h5 class="fw-bold border-bottom pb-2 mb-3 text-success"><i class="fas fa-truck me-2"></i>7. ಮಾರುಕಟ್ಟೆ ಮತ್ತು ಸಾರಿಗೆ (Market & Logistics)</h5>
+                            <div class="row sm-text">
+                                <div class="col-md-4">
+                                    <strong>30. ಎಲ್ಲಿಗೆ ಮಾರುತ್ತೀರಿ?:</strong> ${farmer.market_place || 'N/A'}<br>
+                                    <strong>31. ಸರಿಯಾದ ಬೆಲೆ ಸಿಗುತ್ತದೆಯಾ?:</strong> ${farmer.fair_price || 'N/A'}
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>32. ಹೆಚ್ಚು ಬೆಳೆಯುವ ಉತ್ಪನ್ನಗಳು?:</strong> ${farmer.top_products || 'N/A'}<br>
+                                    <strong>33. ಆಪ್ ಮೂಲಕ ವ್ಯಾಪಾರ ಆಸಕ್ತಿ?:</strong> ${farmer.app_trade_interest || 'N/A'}
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>34. ವಾಹನ ಇದೆಯಾ?:</strong> ${farmer.owns_vehicle || 'No'}<br>
+                                    <strong>ಯಾವ ವಾಹನವಿದೆ?:</strong> ${farmer.vehicle_type || 'N/A'}
+                                </div>
+                            </div>
+                            <div class="mt-3 sm-text">
+                                <strong>35. ಆಪ್ ಸೇರಲು ಆಸಕ್ತಿ?:</strong> ${farmer.app_join_interest || 'N/A'} |
+                                <strong>38. ಯಾವ ಸೇವೆ ಹೆಚ್ಚು ಬೇಕು?:</strong> ${farmer.desired_services || 'None'}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="glass-card p-4">
+                            <h5 class="fw-bold border-bottom pb-2 mb-3 text-success"><i class="fas fa-comment-dots me-2"></i>8. ಅಂತಿಮ ವಿವರಗಳು (Final)</h5>
+                            <div class="row sm-text">
+                                <div class="col-md-4"><strong>39. Launch ಸಮಯದಲ್ಲಿ ಸೇರಲು ಇಷ್ಟವೇ?:</strong><br>${farmer.join_on_launch || 'N/A'}</div>
+                                <div class="col-md-4"><strong>40. ಸಂಪರ್ಕಿಸಲು ಅನುಮತಿ?:</strong><br>${farmer.contact_permission || 'No'}</div>
+                                <div class="col-md-4"><strong>41. Feed Back:</strong><br>${farmer.feedback || 'No feedback'}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    ${farmer.dynamic_responses && farmer.dynamic_responses.length > 0 ? `
+                        <div class="col-md-12">
+                            <div class="glass-card p-4">
+                                <h5 class="fw-bold border-bottom pb-2 mb-3 text-success"><i class="fas fa-plus-circle me-2"></i>ಹೆಚ್ಚುವರಿ ಪ್ರಶ್ನೆಗಳು (Additional Questions)</h5>
+                                <div class="row">
+                                    ${farmer.dynamic_responses.map(dr => `
+                                        <div class="col-md-6 mb-3">
+                                            <div class="p-2 border-start border-success border-4 bg-light">
+                                                <small class="text-muted d-block">${dr.question}</small>
+                                                <strong>${dr.answer}</strong>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    ` : ''}
+                `;
+
+                document.getElementById('deleteBtn').onclick = () => deleteFarmer(farmer.id);
+            } catch (error) {
+                console.error(error);
+                handleAuthError(error);
+            }
+        }
+
+        async function deleteFarmer(id) {
+            if (confirm('Are you sure?')) {
+                try {
+                    await axiosInstance.delete(`/farmers/${id}`);
+                    window.location.href = 'farmers.html';
+                } catch (error) { alert('Failed'); }
+            }
+        }
+
+        function exportFarmerToExcel() {
+            if (!currentFarmer) return;
+
+            let data = {};
+            // Add all farmer base details
+            for (const [key, value] of Object.entries(currentFarmer)) {
+                if (key !== 'dynamic_responses' && key !== 'id') {
+                    data[key] = value;
+                }
+            }
+
+            // Add dynamic responses
+            if (currentFarmer.dynamic_responses && currentFarmer.dynamic_responses.length > 0) {
+                currentFarmer.dynamic_responses.forEach(dr => {
+                    data[dr.question] = dr.answer;
+                });
+            }
+
+            const worksheet = XLSX.utils.json_to_sheet([data]);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Farmer Survey");
+            
+            let sanitizedName = (currentFarmer.full_name || "Farmer").replace(/[^a-zA-Z0-9]/g, '_');
+            XLSX.writeFile(workbook, `Agrivaan_Farmer_${sanitizedName}_Survey.xlsx`);
+        }
+
+        document.addEventListener('DOMContentLoaded', loadFarmerDetails);
+    </script>
+</body>
+</html>

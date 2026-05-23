@@ -247,14 +247,3 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.conditional-trigger').forEach(trigger => updateVisibility(trigger));
     document.querySelectorAll('.other-trigger').forEach(trigger => updateOther(trigger));
 });
-const data = {};
-new FormData(form).forEach((value, key) => {
-    if (value && typeof value === 'string') data[key] = value;
-});
-localStorage.setItem('survey_draft', JSON.stringify(data));
-    });
-
-// Run initial check to sync UI state
-document.querySelectorAll('.conditional-trigger').forEach(trigger => updateVisibility(trigger));
-document.querySelectorAll('.other-trigger').forEach(trigger => updateOther(trigger));
-});

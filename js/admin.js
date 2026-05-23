@@ -118,11 +118,6 @@ async function exportSurveyData() {
     }
 }
 
-function logout() {
-    localStorage.removeItem('agrivaan_token');
-    localStorage.removeItem('admin_email');
-    window.location.href = 'login.html';
-}
 
 // Ensure logout button works
 document.addEventListener('click', (e) => {
